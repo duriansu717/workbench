@@ -11,7 +11,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** 笔记列表 */
+    /** 笔记列表（可按类型筛选） */
     get: operations['list_notes_api_v1_notes_get']
     put?: never
     /** 新建笔记 */
@@ -37,8 +37,59 @@ export interface paths {
     delete: operations['delete_note_api_v1_notes__note_id__delete']
     options?: never
     head?: never
-    /** 修改笔记 */
+    /** 修改笔记（不可改类型） */
     patch: operations['update_note_api_v1_notes__note_id__patch']
+    trace?: never
+  }
+  '/api/v1/media/config': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 上传配置（允许类型与大小上限） */
+    get: operations['get_config_api_v1_media_config_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/media': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 上传媒体文件（multipart，字段名 file） */
+    post: operations['upload_media_api_v1_media_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/media/{media_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 媒体元信息 */
+    get: operations['get_media_api_v1_media__media_id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   '/health': {
@@ -82,10 +133,67 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    /** Body_upload_media_api_v1_media_post */
+    Body_upload_media_api_v1_media_post: {
+      /** File */
+      file: string
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /**
+     * MediaConfig
+     * @description 前端用它设置 accept、以及上传前预检（避免传完才发现超限）。
+     */
+    MediaConfig: {
+      /** Max Size */
+      max_size: number
+      /** Allowed Ext */
+      allowed_ext: string[]
+      /** Image Ext */
+      image_ext: string[]
+      /** Audio Ext */
+      audio_ext: string[]
+      /** Video Ext */
+      video_ext: string[]
+      /**
+       * Upload Endpoint
+       * @default /api/v1/media
+       */
+      upload_endpoint: string
+    }
+    /** MediaRead */
+    MediaRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: 'image' | 'audio' | 'video'
+      /** Path */
+      path: string
+      /** Original Name */
+      original_name: string
+      /** Mime */
+      mime: string
+      /** Size */
+      size: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Url
+       * @description 对外访问路径（前端直接拼进 Markdown）。
+       */
+      readonly url: string
     }
     /**
      * ModuleMeta
@@ -108,11 +216,22 @@ export interface components {
       icon: string
       /** Path */
       path: string
+      /**
+       * Hidden
+       * @default false
+       */
+      hidden: boolean
     }
     /** NoteCreate */
     NoteCreate: {
+      /**
+       * Kind
+       * @default quick
+       * @enum {string}
+       */
+      kind: 'quick' | 'article'
       /** Title */
-      title: string
+      title?: string | null
       /** Content */
       content?: string | null
     }
@@ -123,8 +242,13 @@ export interface components {
        * Format: uuid
        */
       id: string
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: 'quick' | 'article'
       /** Title */
-      title: string
+      title: string | null
       /** Content */
       content: string | null
       /**
@@ -138,7 +262,10 @@ export interface components {
        */
       updated_at: string
     }
-    /** NoteUpdate */
+    /**
+     * NoteUpdate
+     * @description 只改内容，不改类型（kind 不可变）。
+     */
     NoteUpdate: {
       /** Title */
       title?: string | null
@@ -177,6 +304,8 @@ export interface operations {
   list_notes_api_v1_notes_get: {
     parameters: {
       query?: {
+        /** @description quick=随手小记，article=文章；不传返回全部 */
+        kind?: ('quick' | 'article') | null
         page?: number
         size?: number
       }
@@ -321,6 +450,90 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['NoteRead']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_config_api_v1_media_config_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MediaConfig']
+        }
+      }
+    }
+  }
+  upload_media_api_v1_media_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['Body_upload_media_api_v1_media_post']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MediaRead']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_media_api_v1_media__media_id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MediaRead']
         }
       }
       /** @description Validation Error */

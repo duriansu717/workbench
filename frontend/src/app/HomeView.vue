@@ -25,8 +25,9 @@ const today = computed(() =>
 )
 
 onMounted(async () => {
-  // 首页宫格 = 后端功能注册表，加功能自动出现
-  features.value = (await api.get<ModuleMeta[]>('/modules')).data
+  // 首页宫格 = 后端功能注册表，加功能自动出现（hidden 的共享模块不显示）
+  const { data } = await api.get<ModuleMeta[]>('/modules')
+  features.value = data.filter((m) => !m.hidden)
 })
 </script>
 

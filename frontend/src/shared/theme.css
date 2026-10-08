@@ -252,3 +252,27 @@ h3 {
   border-radius: var(--warm-radius);
   border-color: var(--warm-line-soft);
 }
+
+/* ---------- 5. Markdown 编辑器（md-editor-v3）暖色适配 ---------- */
+/* 它的弹窗会 Teleport 到 body，所以必须写在全局，scoped 样式够不到 */
+.md-editor,
+.md-editor-modal-container {
+  --md-bk-color: var(--warm-surface);
+  --md-bk-color-outstand: var(--honey-50);
+  --md-bk-hover-color: var(--honey-100);
+  --md-color: var(--ink-700);
+  --md-hover-color: var(--ink-900);
+  --md-border-color: var(--warm-line);
+  --md-border-hover-color: var(--honey-300);
+  --md-border-active-color: var(--honey-500);
+}
+
+.md-editor {
+  border-radius: var(--warm-radius);
+  overflow: hidden;
+}
+
+/* 工具栏里的 Element Plus 图标尺寸统一（编辑器自带图标体系不同） */
+.md-editor-toolbar-item .el-icon {
+  font-size: 16px;
+}

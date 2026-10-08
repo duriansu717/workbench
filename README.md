@@ -45,6 +45,17 @@ pnpm dev                                            # http://localhost:1213
 ```
 workbench/
 ├─ backend/          # FastAPI 应用（app/core 基础设施 + app/modules 功能模块）
+│  └─ data/uploads/  # 上传的图片/音频/视频（不进版本库，备份记得带上）
 ├─ frontend/         # Vue 应用（src/app 外壳 + src/features 功能 + src/shared 公共）
 └─ docs/             # 文档
 ```
+
+## 媒体
+
+图片 / 音频 / 视频通过 `POST /api/v1/media` 上传（单文件上限 200MB，允许的格式见 `backend/app/core/config.py`），
+文件落在 `backend/data/uploads/`，由 `/media` 静态目录提供访问。
+
+正文里就是普通 Markdown —— `![名称](/media/2026/10/xxx.mp4)`，前端按扩展名自动渲染成图片 / 音频播放器 / 视频播放器：
+
+- 编辑器里：工具栏按钮选择文件，或直接**粘贴**（截图）、**拖入**（音频/视频）
+- 展示时：列表与详情用同一套渲染，视频支持拖动进度条

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { House } from '@element-plus/icons-vue'
 
@@ -10,9 +10,16 @@ import type { ModuleMeta } from '@/shared/types'
 const route = useRoute()
 const features = ref<ModuleMeta[]>([])
 
+// 高亮按路径第一段匹配：/notes/articles/xxx 也要让「笔记」亮着
+const activePath = computed(() => {
+  const first = route.path.split('/').filter(Boolean)[0]
+  return first ? `/${first}` : '/'
+})
+
 onMounted(async () => {
-  // 菜单由后端的功能注册表驱动：加了新模块，这里自动出现
-  features.value = (await api.get<ModuleMeta[]>('/modules')).data
+  // 菜单由后端的功能注册表驱动：加了新模块，这里自动出现（hidden 的共享模块不显示）
+  const { data } = await api.get<ModuleMeta[]>('/modules')
+  features.value = data.filter((m) => !m.hidden)
 })
 </script>
 
@@ -27,7 +34,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <el-menu router :default-active="route.path" class="nav">
+      <el-menu router :default-active="activePath" class="nav">
         <el-menu-item index="/">
           <el-icon><House /></el-icon>
           <span>首页</span>
