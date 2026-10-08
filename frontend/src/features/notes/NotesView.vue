@@ -71,25 +71,37 @@ onMounted(load)
 
 <template>
   <div>
-    <div class="toolbar">
-      <h2>笔记</h2>
+    <div class="page-head">
+      <div>
+        <h2 class="page-title">笔记</h2>
+        <p class="page-sub">随手记下一点什么，一共 {{ total }} 条</p>
+      </div>
       <el-button type="primary" @click="openCreate">新建笔记</el-button>
     </div>
 
-    <el-table v-loading="loading" :data="notes" border>
-      <el-table-column prop="title" label="标题" min-width="180" />
-      <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
-      <el-table-column label="创建时间" width="190">
-        <template #default="{ row }">{{ new Date(row.created_at).toLocaleString() }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="140">
-        <template #default="{ row }">
-          <!-- el-table 插槽的 row 是宽松类型（DefaultRow），这里断言成业务类型 -->
-          <el-button link type="primary" @click="openEdit(row as Note)">编辑</el-button>
-          <el-button link type="danger" @click="remove(row as Note)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="panel">
+      <el-table
+        v-loading="loading"
+        :data="notes"
+        empty-text="还没有笔记，点右上角「新建笔记」写一条吧 ✍️"
+        style="width: 100%"
+      >
+        <el-table-column prop="title" label="标题" min-width="180" />
+        <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
+        <el-table-column label="创建时间" width="190">
+          <template #default="{ row }">
+            <span class="time">{{ new Date(row.created_at).toLocaleString() }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="140" align="right">
+          <template #default="{ row }">
+            <!-- el-table 插槽的 row 是宽松类型（DefaultRow），这里断言成业务类型 -->
+            <el-button link type="primary" @click="openEdit(row as Note)">编辑</el-button>
+            <el-button link type="danger" @click="remove(row as Note)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <el-pagination
       v-model:current-page="page"
@@ -100,13 +112,23 @@ onMounted(load)
       @current-change="load"
     />
 
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑笔记' : '新建笔记'" width="520px">
-      <el-form label-width="60px">
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑笔记' : '新建笔记'" width="540px">
+      <el-form label-width="56px">
         <el-form-item label="标题">
-          <el-input v-model="form.title" maxlength="200" show-word-limit />
+          <el-input
+            v-model="form.title"
+            maxlength="200"
+            show-word-limit
+            placeholder="给它起个名字"
+          />
         </el-form-item>
         <el-form-item label="内容">
-          <el-input v-model="form.content" type="textarea" :rows="6" />
+          <el-input
+            v-model="form.content"
+            type="textarea"
+            :rows="6"
+            placeholder="想到什么就写什么…"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -118,15 +140,13 @@ onMounted(load)
 </template>
 
 <style scoped>
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+.time {
+  color: var(--ink-500);
+  font-size: 13px;
 }
 
 .pager {
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 </style>
