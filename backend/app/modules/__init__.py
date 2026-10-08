@@ -16,4 +16,5 @@
 
 MODULES: list[str] = [
     "notes",
+    "media",  # 共享能力：媒体上传（registry.META 里 hidden=True，不出现在导航）
 ]

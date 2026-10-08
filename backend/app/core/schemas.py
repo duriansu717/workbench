@@ -18,3 +18,5 @@ class ModuleMeta(BaseModel):
     description: str = ""
     icon: str = ""
     path: str
+    # 共享能力（如媒体上传）有路由但不出现在侧边栏与首页宫格
+    hidden: bool = False

@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# ===== 用户数据（上传的媒体文件绝不进版本库）=====
+backend/data/
+
 # ===== Python =====
 .venv/
 venv/

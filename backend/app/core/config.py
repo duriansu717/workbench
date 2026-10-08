@@ -27,5 +27,28 @@ class Settings(BaseSettings):
     # 前端开发服务器来源（前端固定跑在 1213）
     cors_origins: list[str] = ["http://localhost:1213", "http://127.0.0.1:1213"]
 
+    # 媒体上传：文件存本地磁盘（backend/data/uploads），数据库只存元信息
+    upload_dir: Path = BASE_DIR / "data" / "uploads"
+    upload_max_size: int = 200 * 1024 * 1024  # 单文件上限 200MB
+    upload_allowed_ext: list[str] = [
+        # 图片
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+        "avif",
+        # 音频
+        "mp3",
+        "wav",
+        "ogg",
+        "m4a",
+        "flac",
+        # 视频
+        "mp4",
+        "webm",
+        "mov",
+    ]
+
 
 settings = Settings()

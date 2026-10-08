@@ -8,5 +8,6 @@ asyncpg==0.32.0          # 应用异步连接用（psycopg 的 async 不兼容 W
 alembic==1.20.0
 pydantic==2.14.0
 pydantic-settings==2.15.0
+python-multipart==0.0.32   # 文件上传（multipart 表单解析）
 PyJWT==2.15.1
 argon2-cffi==25.1.0
