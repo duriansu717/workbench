@@ -1,0 +1,27 @@
+# ===== 环境与密钥（绝不进版本库）=====
+.env
+.env.*
+!.env.example
+
+# ===== Python =====
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# ===== Node =====
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# ===== IDE / 系统 =====
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+Desktop.ini
