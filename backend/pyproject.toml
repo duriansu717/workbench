@@ -1,0 +1,7 @@
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+# B008: FastAPI 的 Depends()/Query() 写在参数默认值里是官方推荐写法，属误报
+ignore = ["B008"]

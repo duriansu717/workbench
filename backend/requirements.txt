@@ -1,0 +1,12 @@
+# ===== 运行时依赖（版本经过 Python 3.14 + Windows 实测）=====
+# 安装：pip install -r requirements.txt
+fastapi==0.143.0
+uvicorn[standard]==0.54.0
+sqlalchemy[asyncio]==2.1.4
+psycopg[binary]==3.3.6   # Alembic 迁移用（同步）
+asyncpg==0.32.0          # 应用异步连接用（psycopg 的 async 不兼容 Windows ProactorEventLoop）
+alembic==1.20.0
+pydantic==2.14.0
+pydantic-settings==2.15.0
+PyJWT==2.15.1
+argon2-cffi==25.1.0
