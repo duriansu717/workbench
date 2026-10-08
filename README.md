@@ -30,7 +30,7 @@ uvicorn app.main:app --reload                       # 接口文档 http://127.0.
 ```bash
 cd frontend
 pnpm install
-pnpm dev                                            # http://localhost:5173
+pnpm dev                                            # http://localhost:1213
 ```
 
 ## 加一个新功能

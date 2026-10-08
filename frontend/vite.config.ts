@@ -25,6 +25,9 @@ export default defineConfig({
     },
   },
   server: {
+    // 前端固定端口（被占用时直接报错，不悄悄换端口）
+    port: 1213,
+    strictPort: true,
     proxy: {
       // 开发时把 /api 转发给后端（uvicorn 跑在 127.0.0.1:8000）
       '/api': {

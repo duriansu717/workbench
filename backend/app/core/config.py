@@ -24,8 +24,8 @@ class Settings(BaseSettings):
 
     secret_key: str = "dev-secret-change-me"
 
-    # 前端开发服务器来源（Vite 默认 5173）
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # 前端开发服务器来源（前端固定跑在 1213）
+    cors_origins: list[str] = ["http://localhost:1213", "http://127.0.0.1:1213"]
 
 
 settings = Settings()
