@@ -41,3 +41,5 @@ class NoteRead(BaseModel):
     content: str | None
     created_at: datetime
     updated_at: datetime
+    # 有值说明这条在回收站里（回收站页面用它显示删除时间）
+    deleted_at: datetime | None = None

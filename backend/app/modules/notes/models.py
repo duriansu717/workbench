@@ -3,6 +3,8 @@
 两种模式共用一张表，用 kind 区分：
 - quick   随手小记：没有标题，正文短
 - article 文章：有标题，正文是完整的 Markdown
+
+继承 SoftDeleteMixin：删除是逻辑删除（只打 deleted_at 标记），查询默认自动过滤掉。
 """
 
 import uuid
@@ -11,10 +13,10 @@ from datetime import datetime
 from sqlalchemy import DateTime, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, SoftDeleteMixin
 
 
-class Note(Base):
+class Note(SoftDeleteMixin, Base):
     __tablename__ = "notes"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=func.uuidv7())

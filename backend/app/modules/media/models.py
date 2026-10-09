@@ -10,10 +10,10 @@ from datetime import datetime
 from sqlalchemy import BigInteger, DateTime, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, SoftDeleteMixin
 
 
-class Media(Base):
+class Media(SoftDeleteMixin, Base):
     __tablename__ = "media"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=func.uuidv7())

@@ -1,4 +1,7 @@
-"""笔记模块的路由（薄层：参数解析 + 调 service）。"""
+"""笔记模块的路由（薄层：参数解析 + 调 service）。
+
+注意：/deleted 必须声明在 /{note_id} **之前**，否则 "deleted" 会被当成 UUID 解析。
+"""
 
 import uuid
 
@@ -24,6 +27,16 @@ async def list_notes(
     db: AsyncSession = Depends(get_db),
 ) -> Page[NoteRead]:
     notes, total = await service.list_notes(db, kind, page, size)
+    return Page(items=[NoteRead.model_validate(n) for n in notes], total=total)
+
+
+@router.get("/deleted", response_model=Page[NoteRead], summary="回收站（已删除的笔记）")
+async def list_deleted_notes(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+) -> Page[NoteRead]:
+    notes, total = await service.list_notes(db, None, page, size, trash=True)
     return Page(items=[NoteRead.model_validate(n) for n in notes], total=total)
 
 
@@ -54,9 +67,28 @@ async def update_note(
     return NoteRead.model_validate(note)
 
 
-@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, summary="删除笔记")
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, summary="删除笔记（逻辑删除）")
 async def delete_note(note_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> None:
     note = await service.get_note(db, note_id)
     if note is None:
         raise NOT_FOUND
-    await service.delete_note(db, note)
+    await service.soft_delete_note(db, note)
+
+
+@router.post("/{note_id}/restore", response_model=NoteRead, summary="从回收站恢复")
+async def restore_note(note_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> NoteRead:
+    note = await service.get_note(db, note_id, include_deleted=True)
+    if note is None:
+        raise NOT_FOUND
+    note = await service.restore_note(db, note)
+    return NoteRead.model_validate(note)
+
+
+@router.delete(
+    "/{note_id}/purge", status_code=status.HTTP_204_NO_CONTENT, summary="彻底删除（不可恢复）"
+)
+async def purge_note(note_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> None:
+    note = await service.get_note(db, note_id, include_deleted=True)
+    if note is None:
+        raise NOT_FOUND
+    await service.purge_note(db, note)
