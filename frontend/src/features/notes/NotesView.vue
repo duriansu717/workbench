@@ -69,9 +69,12 @@ onMounted(load)
           {{ tab === 'quick' ? '随手记下的小问题、心得' : '写完整的东西' }} · 共 {{ total }} 条
         </p>
       </div>
-      <el-button type="primary" @click="onCreate">
-        {{ tab === 'quick' ? '写一条' : '写一篇' }}
-      </el-button>
+      <div class="head-actions">
+        <el-button link @click="router.push('/notes/trash')">回收站</el-button>
+        <el-button type="primary" @click="onCreate">
+          {{ tab === 'quick' ? '写一条' : '写一篇' }}
+        </el-button>
+      </div>
     </div>
 
     <el-radio-group :model-value="tab" class="switcher" @change="onTabChange">
@@ -103,6 +106,12 @@ onMounted(load)
 </template>
 
 <style scoped>
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .switcher {
   margin-bottom: 18px;
 }

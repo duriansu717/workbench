@@ -9,6 +9,11 @@ export default [
     component: () => import('./NotesView.vue'),
   },
   {
+    path: 'notes/trash',
+    name: 'note-trash',
+    component: () => import('./TrashView.vue'),
+  },
+  {
     path: 'notes/articles/new',
     name: 'note-article-new',
     component: () => import('./ArticleEditView.vue'),

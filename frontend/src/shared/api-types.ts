@@ -22,6 +22,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/notes/deleted': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 回收站（已删除的笔记） */
+    get: operations['list_deleted_notes_api_v1_notes_deleted_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/notes/{note_id}': {
     parameters: {
       query?: never
@@ -33,12 +50,46 @@ export interface paths {
     get: operations['get_note_api_v1_notes__note_id__get']
     put?: never
     post?: never
-    /** 删除笔记 */
+    /** 删除笔记（逻辑删除） */
     delete: operations['delete_note_api_v1_notes__note_id__delete']
     options?: never
     head?: never
     /** 修改笔记（不可改类型） */
     patch: operations['update_note_api_v1_notes__note_id__patch']
+    trace?: never
+  }
+  '/api/v1/notes/{note_id}/restore': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 从回收站恢复 */
+    post: operations['restore_note_api_v1_notes__note_id__restore_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/notes/{note_id}/purge': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** 彻底删除（不可恢复） */
+    delete: operations['purge_note_api_v1_notes__note_id__purge_delete']
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   '/api/v1/media/config': {
@@ -261,6 +312,8 @@ export interface components {
        * Format: date-time
        */
       updated_at: string
+      /** Deleted At */
+      deleted_at?: string | null
     }
     /**
      * NoteUpdate
@@ -368,6 +421,38 @@ export interface operations {
       }
     }
   }
+  list_deleted_notes_api_v1_notes_deleted_get: {
+    parameters: {
+      query?: {
+        page?: number
+        size?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Page_NoteRead_']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_note_api_v1_notes__note_id__get: {
     parameters: {
       query?: never
@@ -451,6 +536,66 @@ export interface operations {
         content: {
           'application/json': components['schemas']['NoteRead']
         }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  restore_note_api_v1_notes__note_id__restore_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        note_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['NoteRead']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  purge_note_api_v1_notes__note_id__purge_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        note_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       /** @description Validation Error */
       422: {

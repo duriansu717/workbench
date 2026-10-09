@@ -38,6 +38,25 @@ export async function removeNote(id: string): Promise<void> {
   await api.delete(`/notes/${id}`)
 }
 
+/** 回收站：已逻辑删除的笔记 */
+export async function listDeletedNotes(params: {
+  page?: number
+  size?: number
+}): Promise<Page<Note>> {
+  const { data } = await api.get<Page<Note>>('/notes/deleted', { params })
+  return data
+}
+
+export async function restoreNote(id: string): Promise<Note> {
+  const { data } = await api.post<Note>(`/notes/${id}/restore`)
+  return data
+}
+
+/** 彻底删除（不可恢复） */
+export async function purgeNote(id: string): Promise<void> {
+  await api.delete(`/notes/${id}/purge`)
+}
+
 export async function getMediaConfig(): Promise<MediaConfig> {
   const { data } = await api.get<MediaConfig>('/media/config')
   return data
