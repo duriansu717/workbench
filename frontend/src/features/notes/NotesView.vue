@@ -113,7 +113,7 @@ onMounted(load)
 }
 
 .switcher {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .pager {

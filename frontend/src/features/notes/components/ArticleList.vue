@@ -1,27 +1,38 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Right } from '@element-plus/icons-vue'
 import { vLoading } from 'element-plus'
 
-import { formatDateTime } from '../time'
+import { plainText } from '../markdown'
+import { formatDate } from '../time'
 import type { Note } from '@/shared/types'
 
-defineProps<{ notes: Note[]; loading: boolean }>()
+const props = defineProps<{ notes: Note[]; loading: boolean }>()
 const emit = defineEmits<{ open: [Note] }>()
+
+// 摘要只算一次（正则不便宜，模板里重复调用会白跑）
+const rows = computed(() => props.notes.map((note) => ({ note, excerpt: plainText(note.content) })))
 </script>
 
 <template>
   <div class="panel">
     <div v-loading="loading" class="rows">
       <button
-        v-for="article in notes"
-        :key="article.id"
+        v-for="row in rows"
+        :key="row.note.id"
         type="button"
         class="row"
-        @click="emit('open', article)"
+        @click="emit('open', row.note)"
       >
-        <span class="title">{{ article.title }}</span>
-        <span class="when">{{ formatDateTime(article.updated_at) }}</span>
-        <el-icon class="arrow"><Right /></el-icon>
+        <span class="body">
+          <span class="title">{{ row.note.title }}</span>
+          <span v-if="row.excerpt" class="excerpt">{{ row.excerpt }}</span>
+        </span>
+
+        <span class="meta">
+          <span class="when">{{ formatDate(row.note.updated_at) }}</span>
+          <el-icon class="arrow"><Right /></el-icon>
+        </span>
       </button>
 
       <p v-if="!loading && !notes.length" class="empty">还没有文章，点右上角「写一篇」开始</p>
@@ -31,22 +42,23 @@ const emit = defineEmits<{ open: [Note] }>()
 
 <style scoped>
 .rows {
-  min-height: 80px;
+  min-height: 96px;
 }
 
+/* 两行式：标题 + 摘要，右侧日期；留白给足，别挤在一起 */
 .row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 22px;
   width: 100%;
-  padding: 15px 20px;
+  padding: 18px 24px;
   border: none;
   border-bottom: 1px solid var(--warm-line-soft);
   background: transparent;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.16s ease;
+  transition: background 0.18s ease;
 }
 
 .row:last-of-type {
@@ -62,31 +74,53 @@ const emit = defineEmits<{ open: [Note] }>()
   outline-offset: -2px;
 }
 
-.title {
+.body {
+  display: flex;
   flex: 1;
   min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.title {
   overflow: hidden;
+  color: var(--ink-900);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: var(--ink-900);
-  font-size: 15px;
-  font-weight: 600;
+}
+
+.excerpt {
+  overflow: hidden;
+  color: var(--ink-500);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .when {
-  flex-shrink: 0;
   color: var(--ink-400);
   font-size: 12.5px;
+  white-space: nowrap;
 }
 
 .arrow {
-  flex-shrink: 0;
   color: var(--honey-300);
   opacity: 0;
   transform: translateX(-4px);
   transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 
 .row:hover .arrow {
@@ -96,7 +130,7 @@ const emit = defineEmits<{ open: [Note] }>()
 
 .empty {
   margin: 0;
-  padding: 32px;
+  padding: 40px 32px;
   color: var(--ink-400);
   font-size: 13px;
   text-align: center;

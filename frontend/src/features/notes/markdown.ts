@@ -44,3 +44,18 @@ export function renderMarkdown(source?: string | null): string {
     ADD_ATTR: ['controls', 'preload', 'playsinline', 'poster', 'title'],
   })
 }
+
+/** 从 Markdown 正文里挤出一小段纯文本，列表页做摘要用 */
+export function plainText(source?: string | null, limit = 90): string {
+  const text = (source ?? '')
+    .replace(/```[\s\S]*?```/g, ' ') // 代码块整段丢掉
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '［媒体］') // 图片/音视频 → 占位
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // 链接只留文字
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '') // 标题符号
+    .replace(/^\s{0,3}>\s?/gm, '') // 引用符号
+    .replace(/^\s{0,3}[-*+]\s+/gm, '') // 列表符号
+    .replace(/[*_`~|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return text.length > limit ? `${text.slice(0, limit)}…` : text
+}
