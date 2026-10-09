@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { renderMarkdown } from '../markdown'
 
@@ -9,11 +9,50 @@ const props = withDefaults(defineProps<{ content?: string | null; compact?: bool
 })
 
 const html = computed(() => renderMarkdown(props.content))
+const root = ref<HTMLDivElement>()
+
+/**
+ * 视频放不出来时给一句人话提示，而不是留一块黑屏。
+ * 典型原因：H.265/HEVC 编码（Chrome/Edge 在 Windows 上解不了）。
+ * 用事件委托挂在容器上 —— 非冒泡事件靠捕获阶段也能收到，v-html 重渲染也不受影响。
+ */
+function onMediaEvent(e: Event) {
+  const el = e.target
+  if (!(el instanceof HTMLVideoElement)) return
+  const broken = e.type === 'error' || (e.type === 'loadedmetadata' && el.videoWidth === 0)
+  if (!broken || el.dataset.tip) return
+  el.dataset.tip = '1'
+  el.classList.add('is-broken')
+
+  const tip = document.createElement('p')
+  tip.className = 'media-tip'
+  tip.textContent = '这个视频浏览器解不了（多半是 H.265/HEVC 编码）。转成 H.264 的 mp4 就能播。'
+  el.insertAdjacentElement('afterend', tip)
+}
+
+/** 点图片在新标签看原图（没被链接包住的图片才处理） */
+function onClick(e: MouseEvent) {
+  const el = e.target
+  if (!(el instanceof HTMLImageElement) || el.closest('a')) return
+  window.open(el.currentSrc || el.src, '_blank', 'noopener')
+}
+
+onMounted(() => {
+  root.value?.addEventListener('error', onMediaEvent, true)
+  root.value?.addEventListener('loadedmetadata', onMediaEvent, true)
+  root.value?.addEventListener('click', onClick)
+})
+
+onBeforeUnmount(() => {
+  root.value?.removeEventListener('error', onMediaEvent, true)
+  root.value?.removeEventListener('loadedmetadata', onMediaEvent, true)
+  root.value?.removeEventListener('click', onClick)
+})
 </script>
 
 <template>
   <!-- 内容来自我们自己的 markdown-it 渲染 + DOMPurify 过滤，不是用户原始 HTML -->
-  <div class="note-content" :class="{ compact }" v-html="html" />
+  <div ref="root" class="note-content" :class="{ compact }" v-html="html" />
 </template>
 
 <style scoped>
@@ -72,19 +111,46 @@ const html = computed(() => renderMarkdown(props.content))
   padding: 0;
   background: none;
 }
-.note-content :deep(img),
+
+/* ---- 媒体：都限高限宽并居中，竖版照片不会铺满整列 ---- */
+.note-content :deep(img) {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 560px;
+  margin: 12px auto;
+  border-radius: var(--warm-radius);
+  cursor: zoom-in;
+}
+
 .note-content :deep(video) {
   display: block;
-  max-width: 100%;
-  margin: 12px 0;
+  max-width: min(100%, 720px);
+  max-height: 560px;
+  margin: 12px auto;
   border-radius: var(--warm-radius);
-}
-.note-content :deep(video) {
   background: #000;
 }
+
+/* 解不出来的视频别占一大块，缩成一条并显示提示 */
+.note-content :deep(video.is-broken) {
+  max-height: 170px;
+  opacity: 0.55;
+}
+
+.note-content :deep(.media-tip) {
+  margin: 6px 0 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--honey-50);
+  color: var(--ink-500);
+  font-size: 12.5px;
+}
+
 .note-content :deep(audio) {
   display: block;
-  width: 100%;
+  max-width: 520px;
   margin: 10px 0;
 }
 .note-content :deep(table) {
@@ -132,7 +198,7 @@ const html = computed(() => renderMarkdown(props.content))
 }
 .note-content.compact :deep(img),
 .note-content.compact :deep(video) {
-  max-height: 320px;
+  max-height: 300px;
   margin: 8px 0;
 }
 </style>

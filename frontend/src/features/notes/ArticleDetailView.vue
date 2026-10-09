@@ -68,7 +68,10 @@ async function onRemove() {
   margin-bottom: 14px;
 }
 
+/* 正文栏收窄到 860px：长文更好读，图片也不会被拉到整屏宽 */
 .article {
+  max-width: 860px;
+  margin: 0 auto;
   padding: 32px 38px 40px;
 }
 
